@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://YOUR_BACKEND_DOMAIN/api/$1"
+    }
+  ]
+}

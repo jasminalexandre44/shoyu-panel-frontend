@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing - SHOYU Panel</title>
+<link rel="stylesheet" href="/css/style.css?v=20260910-1">
+</head>
+<body>
+<div class="pricing-shell">
+    <div class="pricing-wrap">
+        <header class="pricing-header">
+            <div class="pricing-hero glass">
+                <div class="pricing-hero-badge" id="pricing-badge">Premium access</div>
+                <div class="pricing-hero-body">
+                    <div class="brand pricing-brand">
+                        <span class="icon" id="brand-icon"></span>
+                        <h1 id="brand-title" class="brand-wordmark brand-wordmark-pricing">SHOYU</h1>
+                    </div>
+                    <div class="pricing-hero-copy">
+                        <h2>Upgrade your workflow with a sharper edge.</h2>
+                        <p id="brand-subtitle">Flexible plans for panel access and premium management tools.</p>
+                    </div>
+                </div>
+                <div class="pricing-hero-meta">
+                    <span>Fast setup</span>
+                    <span>Priority support</span>
+                    <span>Owner-managed</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="pricing-root" class="pricing-grid"></div>
+
+        <div class="pricing-footer">
+            <p>Need help? Contact owner or channel below.</p>
+            <p><a href="/index.html">Login</a> · <a id="channel-link" href="#" target="_blank" rel="noopener">Telegram Channel</a> · <a id="owner-link" href="#" target="_blank" rel="noopener">Owner Contact</a></p>
+        </div>
+    </div>
+</div>
+
+<script src="/js/icons.js"></script>
+<script src="/js/api.js?v=20260910-1"></script>
+<script>
+    async function renderPricing() {
+        const brand = await loadBranding() || window.__BRAND__ || {};
+        const brandTitle = document.getElementById("brand-title");
+        const brandSubtitle = document.getElementById("brand-subtitle");
+        const brandIcon = document.getElementById("brand-icon");
+        const paymentRoot = document.getElementById("pricing-root");
+        document.getElementById("channel-link").href = brand.telegramChannel || "#";
+        document.getElementById("owner-link").href = brand.telegramOwnerContact || "#";
+
+        if (brand.webName) brandTitle.textContent = brand.webName;
+        if (brand.webSubtitle) brandSubtitle.textContent = brand.webSubtitle;
+        if (brand.pricingBadge) document.getElementById("pricing-badge").textContent = brand.pricingBadge;
+        if (brand.logoPhoto) {
+            brandIcon.innerHTML = `<img class="brand-photo splash-photo" src="${brand.logoPhoto}" alt="${brand.webName || 'SHOYU'} logo">`;
+        }
+
+        let pricing = { plans: {} };
+        try {
+            const data = await api('/system/pricing');
+            pricing = data.pricing || pricing;
+        } catch (error) {
+            console.warn('Failed to load pricing', error);
+        }
+
+        const planGroups = [
+            { key: 'PREMIUM', title: 'Premium', note: 'Best for general access' },
+            { key: 'VVIP', title: 'VVIP', note: 'Priority access' },
+            { key: 'SELLER', title: 'Seller', note: 'Business and resale' },
+            { key: 'ADMIN', title: 'Admin', note: 'Full control' },
+        ];
+
+        const cards = planGroups.map(({ key, title, note }) => {
+            const plans = (pricing.plans && pricing.plans[key]) || [];
+            const rows = plans.length ? plans.map((plan) => `<li><span>${plan.label}</span><strong>Rp ${Number(plan.price).toLocaleString('id-ID')}</strong></li>`).join('') : `<li><span>Custom</span><strong>Contact owner</strong></li>`;
+            const orderUrl = (brand.telegramOwnerContact || brand.telegramChannel || "/index.html");
+            const label = `Order ${title}`;
+            return `
+                <article class="card pricing-card ${key === 'PREMIUM' ? 'featured' : ''}">
+                    <span class="tag">${key}</span>
+                    <h2>${title}</h2>
+                    <div class="price"><strong>${plans[0] ? `Rp ${Number(plans[0].price).toLocaleString('id-ID')}` : 'Custom'}</strong><span>${note}</span></div>
+                    <ul>${rows}</ul>
+                    <button class="btn cta" type="button" data-order-link="${orderUrl}" data-order-label="${label}">${label}</button>
+                </article>
+            `;
+        }).join('');
+
+        paymentRoot.innerHTML = cards;
+        paymentRoot.querySelectorAll('[data-order-link]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const href = button.dataset.orderLink;
+                if (href && /^https?:\/\//.test(href)) {
+                    window.open(href, '_blank', 'noopener');
+                    return;
+                }
+                if (href && href.startsWith('tg:')) {
+                    window.location.href = href;
+                    return;
+                }
+                window.location.href = '/index.html';
+            });
+        });
+
+    }
+
+    renderPricing();
+</script>
+</body>
+</html>
