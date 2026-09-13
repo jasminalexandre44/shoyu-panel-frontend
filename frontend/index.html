@@ -7,12 +7,20 @@
 <link rel="stylesheet" href="/css/style.css?v=20260907-5">
 </head>
 <body class="auth-boot">
+<div class="login-splash" id="login-splash" aria-hidden="true">
+    <div class="splash-mark"><img src="/assets/shoyu-logo.svg" alt="SHOYU"></div>
+    <strong id="splash-title" class="brand-wordmark brand-wordmark-splash">SHOYU</strong>
+    <span id="splash-tagline">Management Panel</span>
+    <div class="splash-line"><i></i></div>
+</div>
 <div class="auth-wrap">
     <div class="auth-layout">
         <div class="auth-card glass">
-            <div class="brand brand-no-logo">
+            <div class="auth-card-orbit" aria-hidden="true"></div>
+            <div class="brand">
+                <span class="icon" id="brand-icon"><img class="brand-photo splash-photo" src="/assets/shoyu-logo.svg" alt="SHOYU logo"></span>
                 <h2 id="brand-title" class="brand-wordmark brand-wordmark-login">SHOYU</h2>
-                <p id="brand-subtitle">Management Panel</p>
+                <p id="brand-subtitle">WhatsApp Management Panel</p>
             </div>
             <div class="auth-heading">
                 <span class="auth-kicker">Sign in</span>
@@ -41,6 +49,14 @@
 <script src="/js/icons.js"></script>
 <script src="/js/api.js?v=20260907-3"></script>
 <script>
+    const splashMark = document.getElementById("login-splash").querySelector(".splash-mark");
+    splashMark.innerHTML = `<img class="brand-photo splash-photo" src="/assets/shoyu-logo.svg" alt="SHOYU logo">`;
+
+    window.setTimeout(() => {
+        document.body.classList.remove("auth-boot");
+        document.getElementById("login-splash").setAttribute("hidden", "hidden");
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 780);
+
     const form = document.getElementById("login-form");
     const errorEl = document.getElementById("auth-error");
     const btn = document.getElementById("login-btn");
@@ -60,8 +76,13 @@
     loadBranding().then((b) => {
         if (!b) return;
         document.getElementById("brand-title").textContent = b.webName;
-        document.getElementById("brand-subtitle").textContent = b.webSubtitle || b.loginTagline || "Management Panel";
+        document.getElementById("brand-subtitle").textContent = b.webSubtitle;
+        document.getElementById("splash-title").textContent = b.webName;
+        document.getElementById("splash-tagline").textContent = b.loginTagline || "Management Panel";
         document.getElementById("brand-icon").innerHTML = b.logoPhoto
+            ? `<img class="brand-photo splash-photo" src="${b.logoPhoto}" alt="${b.webName} logo">`
+            : "";
+        splashMark.innerHTML = b.logoPhoto
             ? `<img class="brand-photo splash-photo" src="${b.logoPhoto}" alt="${b.webName} logo">`
             : "";
         document.title = `Login - ${b.webName}`;
