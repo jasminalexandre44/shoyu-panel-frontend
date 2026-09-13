@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR_BACKEND_DOMAIN/api/$1"
+      "destination": "https://103.245.27.109:4556/api/$1"
     }
   ]
 }
