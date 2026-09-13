@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <defs>
+    <linearGradient id="shoyuGlow" x1="18" y1="10" x2="78" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".5" stop-color="#DDE5EE"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M48 6C48 6 18 38 18 58.5C18 76.45 31.43 90 48 90s30-13.55 30-31.5C78 38 48 6 48 6Z" fill="#050608" stroke="url(#shoyuGlow)" stroke-width="2.2" filter="url(#softGlow)"/>
+  <path d="M31 49c4.5-7.4 10.4-10.8 17.8-10.8 7.1 0 12.1 2.6 15.2 7.8 2.8 4.7 1.6 9.3-3.5 11.6-3.3 1.5-7.2 1.8-10.9 2.3-5.6.8-9.5 2.3-9.5 6.1 0 3.1 3.1 5 8.5 5 5.7 0 10.2-2.1 13.8-6.5" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" filter="url(#softGlow)"/>
+  <path d="M29 29c5.8-5.2 12.1-8.2 19-8.8" stroke="#FFFFFF" stroke-opacity=".82" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
