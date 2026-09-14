@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - SHOYU Panel</title>
-<link rel="stylesheet" href="/css/style.css?v=20260907-5">
+<link rel="stylesheet" href="/css/style.css?v=20260914-1">
 </head>
 <body class="auth-boot">
 <div class="login-splash" id="login-splash" aria-hidden="true">
@@ -15,34 +15,82 @@
 </div>
 <div class="auth-wrap">
     <div class="auth-layout">
-        <div class="auth-card glass">
-            <div class="auth-card-orbit" aria-hidden="true"></div>
-            <div class="brand">
-                <span class="icon" id="brand-icon"><img class="brand-photo splash-photo" src="/assets/shoyu-logo.svg" alt="SHOYU logo"></span>
-                <h2 id="brand-title" class="brand-wordmark brand-wordmark-login">SHOYU</h2>
-                <p id="brand-subtitle">WhatsApp Management Panel</p>
-            </div>
-            <div class="auth-heading">
-                <span class="auth-kicker">Sign in</span>
-                <h1>Welcome back</h1>
-                <p>Use your account to continue.</p>
-            </div>
-            <form id="login-form">
-                <div class="field">
-                    <label for="username">Username</label>
-                    <div class="auth-input-wrap"><span class="auth-input-mark">@</span><input type="text" id="username" autocomplete="username" placeholder="Enter your username" required></div>
+        <div class="auth-split">
+            <section class="auth-intro">
+                <div class="auth-intro-top">
+                    <span class="icon" id="brand-icon"><img class="brand-photo splash-photo" src="/assets/shoyu-logo.svg" alt="SHOYU logo"></span>
+                    <span class="auth-intro-brand">SHOYU</span>
                 </div>
-                <div class="field">
-                    <label for="password">Password</label>
-                    <div class="auth-input-wrap"><span class="auth-input-mark">*</span><input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" class="password-toggle" id="password-toggle" aria-label="Show password">Show</button></div>
+                <div class="auth-intro-copy">
+                    <span class="auth-kicker">Control Access</span>
+                    <h1>Management Console</h1>
+                    <p>Secure operator access for WhatsApp, automation, and customer operations.</p>
                 </div>
-                <div class="auth-error" id="auth-error"></div>
-                <button type="submit" class="btn block" id="login-btn">Login to panel <span aria-hidden="true">&#8594;</span></button>
-            </form>
-            <div class="auth-extra">
-                <span>Need an account?</span>
-                <a href="/pricing.html">View plans</a>
-            </div>
+                <div class="auth-intro-grid">
+                    <div class="auth-intro-metric">
+                        <span class="auth-metric-value">24/7</span>
+                        <span class="auth-metric-label">Operations</span>
+                    </div>
+                    <div class="auth-intro-metric">
+                        <span class="auth-metric-value">01</span>
+                        <span class="auth-metric-label">Panel</span>
+                    </div>
+                </div>
+                <div class="auth-intro-footer">
+                    <span class="auth-live-dot"></span>
+                    <span class="auth-live-text">system online</span>
+                </div>
+
+                <div class="auth-mobile-login">
+                    <div class="auth-heading">
+                        <span class="auth-kicker">Sign in</span>
+                        <h1>Welcome back</h1>
+                        <p>Use your account to continue.</p>
+                    </div>
+                    <form id="mobile-login-form" class="mobile-login-form">
+                        <div class="field">
+                            <label for="mobile-username">Username</label>
+                            <div class="auth-input-wrap"><span class="auth-input-mark">@</span><input type="text" id="mobile-username" autocomplete="username" placeholder="Enter your username" required></div>
+                        </div>
+                        <div class="field">
+                            <label for="mobile-password">Password</label>
+                            <div class="auth-input-wrap"><span class="auth-input-mark">*</span><input type="password" id="mobile-password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" class="password-toggle mobile-password-toggle" id="mobile-password-toggle" aria-label="Show password">Show</button></div>
+                        </div>
+                        <div class="auth-error" id="mobile-auth-error"></div>
+                        <button type="submit" class="btn block" id="mobile-login-btn">Login to panel <span aria-hidden="true">&#8594;</span></button>
+                    </form>
+                    <div class="auth-extra mobile-auth-extra"><span>Need an account?</span><a href="/pricing.html">View plans</a></div>
+                </div>
+            </section>
+            <section class="auth-card glass">
+                <div class="auth-card-orbit" aria-hidden="true"></div>
+                <div class="brand">
+                    <span class="icon" id="brand-icon-login"><img class="brand-photo splash-photo" src="/assets/shoyu-logo.svg" alt="SHOYU logo"></span>
+                    <h2 id="brand-title" class="brand-wordmark brand-wordmark-login">SHOYU</h2>
+                    <p id="brand-subtitle">WhatsApp Management Panel</p>
+                </div>
+                <div class="auth-heading">
+                    <span class="auth-kicker">Sign in</span>
+                    <h1>Welcome back</h1>
+                    <p>Use your account to continue.</p>
+                </div>
+                <form id="login-form">
+                    <div class="field">
+                        <label for="username">Username</label>
+                        <div class="auth-input-wrap"><span class="auth-input-mark">@</span><input type="text" id="username" autocomplete="username" placeholder="Enter your username" required></div>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <div class="auth-input-wrap"><span class="auth-input-mark">*</span><input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" class="password-toggle" id="password-toggle" aria-label="Show password">Show</button></div>
+                    </div>
+                    <div class="auth-error" id="auth-error"></div>
+                    <button type="submit" class="btn block" id="login-btn">Login to panel <span aria-hidden="true">&#8594;</span></button>
+                </form>
+                <div class="auth-extra">
+                    <span>Need an account?</span>
+                    <a href="/pricing.html">View plans</a>
+                </div>
+            </section>
         </div>
     </div>
 </div>
@@ -55,12 +103,20 @@
     window.setTimeout(() => {
         document.body.classList.remove("auth-boot");
         document.getElementById("login-splash").setAttribute("hidden", "hidden");
-    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 780);
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 2500);
 
     const form = document.getElementById("login-form");
     const errorEl = document.getElementById("auth-error");
     const btn = document.getElementById("login-btn");
     const passwordToggle = document.getElementById("password-toggle");
+    const loginButtonText = "Login to panel <span aria-hidden=\"true\">&#8594;</span>";
+
+    function restoreLoginButton(target) {
+        target.disabled = false;
+        target.dataset.busy = "false";
+        target.innerHTML = loginButtonText;
+        target.setAttribute("aria-busy", "false");
+    }
 
     passwordToggle.addEventListener("click", () => {
         const password = document.getElementById("password");
@@ -88,26 +144,51 @@
         document.title = `Login - ${b.webName}`;
     });
 
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    const mobileForm = document.getElementById("mobile-login-form");
+    const mobileErrorEl = document.getElementById("mobile-auth-error");
+    const mobileBtn = document.getElementById("mobile-login-btn");
+    const mobilePassword = document.getElementById("mobile-password");
+    const mobilePasswordToggle = document.getElementById("mobile-password-toggle");
+
+    mobilePasswordToggle.addEventListener("click", () => {
+        const visible = mobilePassword.type === "text";
+        mobilePassword.type = visible ? "password" : "text";
+        mobilePasswordToggle.textContent = visible ? "Show" : "Hide";
+        mobilePasswordToggle.setAttribute("aria-label", visible ? "Show password" : "Hide password");
+    });
+
+    async function submitLogin(form, errorEl, btn, usernameEl, passwordEl) {
+        if (btn.dataset.busy === "true") return;
+
         errorEl.textContent = "";
+        btn.dataset.busy = "true";
         btn.disabled = true;
+        btn.setAttribute("aria-busy", "true");
         btn.innerHTML = `<span class="spinner"></span> Signing in...`;
 
         try {
             await api("/auth/login", {
                 method: "POST",
                 body: {
-                    username: document.getElementById("username").value.trim(),
-                    password: document.getElementById("password").value,
+                    username: usernameEl.value.trim(),
+                    password: passwordEl.value,
                 },
             });
             window.location.href = "/dashboard.html";
         } catch (err) {
             errorEl.textContent = err.message;
-            btn.disabled = false;
-            btn.textContent = "Login";
+            restoreLoginButton(btn);
         }
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await submitLogin(form, errorEl, btn, document.getElementById("username"), document.getElementById("password"));
+    });
+
+    mobileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await submitLogin(mobileForm, mobileErrorEl, mobileBtn, document.getElementById("mobile-username"), mobilePassword);
     });
 </script>
 </body>

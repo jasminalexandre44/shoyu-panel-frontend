@@ -2,6 +2,13 @@
     const user = await guardAuth();
     if (!user) return;
 
+    const escapeHtml = (value) => String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
     const content = renderShell(user, "/dashboard.html");
     setPageTitle("Dashboard");
     content.innerHTML = `
@@ -33,6 +40,7 @@
 
         const s = data.systemStatus;
         const stats = data.stats || {};
+        const notifications = Array.isArray(data.notifications) ? data.notifications : [];
         const statusItem = (name, ok) => `
             <div class="status-item">
                 <div class="status-row">
@@ -40,6 +48,35 @@
                     <span class="status-name">${name}</span>
                 </div>
                 <div class="status-text">${ok ? "Operational" : "Down"}</div>
+            </div>
+        `;
+
+        const notificationMarkup = notifications.length ? `
+            <div class="card dashboard-notifications" style="margin-bottom:14px">
+                <div class="panel-head-row">
+                    <h3>Notifications</h3>
+                    <span class="notification-count">${notifications.filter((n) => !n.read).length}</span>
+                </div>
+                <div class="notification-list">
+                    ${notifications.map((n) => `
+                        <div class="notification-item ${n.read ? "is-read" : "is-unread"} ${n.type || "info"}">
+                            <span class="notification-bullet" aria-hidden="true"></span>
+                            <div class="notification-body">
+                                <strong>${escapeHtml(n.title || "Notification")}</strong>
+                                <small>${escapeHtml(n.message || "")}</small>
+                                <time>${new Date(n.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</time>
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>
+            </div>
+        ` : `
+            <div class="card dashboard-notifications" style="margin-bottom:14px">
+                <div class="panel-head-row">
+                    <h3>Notifications</h3>
+                    <span class="notification-count">0</span>
+                </div>
+                ${emptyState("No notifications yet", "bell")}
             </div>
         `;
 
@@ -60,11 +97,19 @@
                 ${navToggleHtml}
             </div>
 
+            <a class="card dashboard-chat-launch" href="/chat.html">
+                <span class="dashboard-chat-icon">${icon("whatsapp")}</span>
+                <span class="dashboard-chat-copy"><span class="page-kicker">Private panel chat</span><strong>Talk with your team</strong><small>Open a live room with another panel user.</small></span>
+                <span class="dashboard-chat-arrow">${icon("chevron")}</span>
+            </a>
+
             <div class="dashboard-metrics" aria-label="Account metrics">
                 <div class="metric-item"><span class="metric-dot online"></span><div><span class="metric-label">Active Sessions</span><strong>${stats.activeSenderCount ?? 0}</strong><small>of ${data.senderCount} registered</small></div></div>
                 <div class="metric-item"><span class="metric-dot blue"></span><div><span class="metric-label">Messages Sent</span><strong>${stats.totalMessages ?? 0}</strong><small>successful activity</small></div></div>
                 <div class="metric-item"><span class="metric-dot warning"></span><div><span class="metric-label">Logged Issues</span><strong>${stats.errorCount ?? 0}</strong><small>recent account activity</small></div></div>
             </div>
+
+            ${notificationMarkup}
 
             <div class="card" style="margin-bottom:14px">
                 <h3>System Status</h3>
@@ -116,6 +161,36 @@
             navToggle.textContent = expanded ? "Show more" : "Show less";
             document.querySelectorAll(".nav-box-extra").forEach((item) => item.classList.toggle("is-visible", !expanded));
         });
+
+        async function refreshNotificationsOnly() {
+            if (document.hidden) return;
+            try {
+                const fresh = await api("/dashboard");
+                const nextItems = Array.isArray(fresh.notifications) ? fresh.notifications : [];
+                const root = document.querySelector(".dashboard-notifications");
+                if (!root) return;
+                const count = nextItems.filter((n) => !n.read).length;
+                const badge = root.querySelector(".notification-count");
+                if (badge) badge.textContent = String(count);
+                const list = root.querySelector(".notification-list");
+                if (list) {
+                    list.innerHTML = nextItems.map((n) => `
+                        <div class="notification-item ${n.read ? "is-read" : "is-unread"} ${n.type || "info"}">
+                            <span class="notification-bullet" aria-hidden="true"></span>
+                            <div class="notification-body">
+                                <strong>${escapeHtml(n.title || "Notification")}</strong>
+                                <small>${escapeHtml(n.message || "")}</small>
+                                <time>${new Date(n.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</time>
+                            </div>
+                        </div>
+                    `).join("") || `${emptyState("No notifications yet", "bell")}`;
+                }
+            } catch {
+                // silent polling failure; no user-facing interruption
+            }
+        }
+
+        setInterval(refreshNotificationsOnly, 5000);
     } catch (err) {
         content.innerHTML = errorState(err.message);
         toast(err.message, "error");

@@ -77,6 +77,7 @@ async function logout() {
 }
 
 const COLOR_THEME_OPTIONS = [
+    { id: "default", label: "Default", swatch: "#101114" },
     { id: "midnight", label: "Midnight", swatch: "#0a0d14" },
     { id: "graphite", label: "Graphite", swatch: "#17191d" },
     { id: "frost", label: "Frost", swatch: "#dfe7ef" },
@@ -112,7 +113,7 @@ const XTHEME_OPTIONS = [
 const THEME_OPTIONS = [...COLOR_THEME_OPTIONS, ...XTHEME_OPTIONS];
 
 function applyTheme(themeId) {
-    const theme = THEME_OPTIONS.some((item) => item.id === themeId) ? themeId : "midnight";
+    const theme = THEME_OPTIONS.some((item) => item.id === themeId) ? themeId : "default";
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("shoyu-theme", theme);
 
@@ -121,18 +122,19 @@ function applyTheme(themeId) {
     });
 }
 
-applyTheme(localStorage.getItem("shoyu-theme") || "midnight");
+applyTheme(localStorage.getItem("shoyu-theme") || "default");
 
 // ---------- NAV (dipakai kotak-kotak di Dashboard, bukan sidebar) ---------- //
 const NAV_ITEMS = [
     { href: "/dashboard.html", icon: "dashboard", label: "Dashboard", sub: "Overview" },
     { href: "/whatsapp.html", icon: "whatsapp", label: "WhatsApp", sub: "Manage senders", roles: ["OWNER", "ADMIN", "RESELLER", "VVIP", "PREMIUM"] },
     { href: "/xmessage.html", icon: "bug", label: "Travas", sub: "Send messages", roles: ["OWNER", "ADMIN", "RESELLER", "VVIP", "PREMIUM"] },
+    { href: "/chat.html", icon: "whatsapp", label: "Live Chat", sub: "Talk to panel users", roles: ["OWNER", "ADMIN", "RESELLER", "VVIP", "PREMIUM"] },
     { href: "/sessions.html", icon: "sessions", label: "Sessions", sub: "Connection status", roles: ["OWNER", "ADMIN", "RESELLER", "VVIP", "PREMIUM"] },
     { href: "/logs.html", icon: "logs", label: "Logs", sub: "Activity & errors", roles: ["OWNER", "ADMIN", "RESELLER"] },
     { href: "/system.html", icon: "system", label: "System Status", sub: "System health", roles: ["OWNER", "ADMIN", "RESELLER", "VVIP", "PREMIUM"] },
     { href: "/tools.html", icon: "system", label: "Tools", sub: "Useful utilities" },
-    { href: "/database.html", icon: "database", label: "Database", sub: "Manage users", roles: ["OWNER"] },
+    { href: "/database.html", icon: "database", label: "Database", sub: "Manage users", roles: ["OWNER", "ADMIN", "RESELLER"] },
     { href: "/profile.html", icon: "profile", label: "Profile", sub: "Account info" },
 ];
 
