@@ -119,11 +119,28 @@
             <div class="database-modal" id="password-modal" hidden><div class="database-modal-backdrop" data-close-password></div><div class="card database-password"><span class="page-kicker">Save these credentials</span><h3>Account created</h3><p>The generated password is shown once. Store it securely before closing.</p><div class="credential-line"><span>Username</span><strong id="created-username"></strong><button type="button" class="btn small secondary" data-copy="username">Copy</button></div><div class="credential-line"><span>Password</span><strong id="created-password"></strong><button type="button" class="btn small secondary" data-copy="password">Copy</button></div><div class="credential-line"><span>Panel</span><a id="created-panel-link" target="_blank" rel="noreferrer" href="#"></a></div><button class="btn block" data-close-password>Done</button></div></div>
         `;
 
+        const createModal = document.getElementById("create-user-modal");
+        const passwordModal = document.getElementById("password-modal");
+        const setModalOpen = (modal, open) => {
+            if (!modal) return;
+            modal.hidden = !open;
+            document.body.style.overflow = open ? "hidden" : "";
+            if (open) {
+                modal.setAttribute("aria-hidden", "false");
+                requestAnimationFrame(() => {
+                    const input = modal.querySelector("input:not([type=hidden]), select");
+                    if (input) input.focus();
+                });
+            } else {
+                modal.setAttribute("aria-hidden", "true");
+            }
+        };
+
         document.getElementById("database-search").addEventListener("input", refreshTable);
         document.getElementById("database-role").addEventListener("change", refreshTable);
-        document.getElementById("open-create-user").addEventListener("click", () => { document.getElementById("create-user-modal").hidden = false; });
-        document.querySelectorAll("[data-close-create]").forEach((element) => element.addEventListener("click", () => { document.getElementById("create-user-modal").hidden = true; }));
-        document.querySelectorAll("[data-close-password]").forEach((element) => element.addEventListener("click", () => { document.getElementById("password-modal").hidden = true; }));
+        document.getElementById("open-create-user").addEventListener("click", () => setModalOpen(createModal, true));
+        document.querySelectorAll("[data-close-create]").forEach((element) => element.addEventListener("click", () => setModalOpen(createModal, false)));
+        document.querySelectorAll("[data-close-password]").forEach((element) => element.addEventListener("click", () => setModalOpen(passwordModal, false)));
         document.querySelectorAll("[data-copy]").forEach((button) => button.addEventListener("click", async () => {
             const field = button.dataset.copy;
             const value = field === "username" ? document.getElementById("created-username").textContent : document.getElementById("created-password").textContent;
@@ -204,6 +221,14 @@
         const errorBox = document.getElementById("create-user-error");
         const statusBox = document.getElementById("create-user-status");
         const button = form.querySelector("button[type=submit]");
+        const payload = Object.fromEntries(new FormData(form).entries());
+        payload.username = String(payload.username || "").trim();
+        const usernamePattern = /^[A-Za-z0-9_]{3,20}$/;
+        if (!usernamePattern.test(payload.username)) {
+            errorBox.textContent = "Username must be 3-20 characters and contain only letters, numbers, or underscores.";
+            statusBox.textContent = "Creation failed. Check the form and try again.";
+            return;
+        }
         const formFields = [...form.querySelectorAll("input, select, button")];
         button.disabled = true;
         form.setAttribute("aria-busy", "true");
@@ -212,7 +237,6 @@
         statusBox.textContent = "Creating account. Please wait...";
         errorBox.textContent = "";
         toast("Account creation is in progress...", "info");
-        const payload = Object.fromEntries(new FormData(form).entries());
         try {
             const data = await api("/database/users", { method: "POST", body: payload });
             await loadUsers();
@@ -223,7 +247,8 @@
             panelLink.textContent = data.panelDomain || "Panel link unavailable";
             panelLink.href = data.panelDomain || "#";
             panelLink.hidden = !data.panelDomain;
-            document.getElementById("password-modal").hidden = false;
+            setModalOpen(createModal, false);
+            setModalOpen(passwordModal, true);
         } catch (error) {
             errorBox.textContent = error.message;
             statusBox.textContent = "Creation failed. Check the form and try again.";

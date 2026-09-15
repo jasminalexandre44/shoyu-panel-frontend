@@ -50,12 +50,22 @@ async function api(path, { method = "GET", body } = {}) {
 
 // ---------- BRANDING ---------- //
 async function loadBranding() {
+    const cacheKey = "shoyu-branding-cache";
+    try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+        if (cached?.branding && Date.now() - cached.savedAt < 5 * 60 * 1000) {
+            window.__BRAND__ = cached.branding;
+            return cached.branding;
+        }
+    } catch {}
+
     try {
         const data = await api("/branding");
         window.__BRAND__ = data.branding;
+        try { sessionStorage.setItem(cacheKey, JSON.stringify({ branding: data.branding, savedAt: Date.now() })); } catch {}
         return data.branding;
     } catch {
-        return null;
+        return window.__BRAND__ || null;
     }
 }
 
@@ -152,8 +162,7 @@ document.addEventListener("click", (event) => {
     if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
 
     event.preventDefault();
-    document.body.classList.add("page-exiting");
-    window.setTimeout(() => { window.location.href = destination.href; }, 140);
+    window.location.href = destination.href;
 });
 
 window.addEventListener("pageshow", () => {

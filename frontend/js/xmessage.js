@@ -1,4 +1,11 @@
 (async function () {
+    const escapeHtml = (value) => String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
     const user = await guardAuth();
     if (!user) return;
 
@@ -10,6 +17,10 @@
     let globalSessions = [];
     let canUseGlobal = false;
     const globalEligibleRole = ["OWNER", "ADMIN", "RESELLER", "VVIP"].includes(user.role);
+    const withTimeout = (promise, timeoutMs) => Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Global sender lookup timed out.")), timeoutMs)),
+    ]);
 
     content.innerHTML = `<div class="skeleton" style="height:300px"></div>`;
 
@@ -21,7 +32,7 @@
         personalSessions = sessData.personal.filter((s) => s.live === "connected");
         functions = fnData.functions;
         try {
-            const globalData = await api("/whatsapp/global-active");
+            const globalData = await withTimeout(api("/whatsapp/global-active"), 8000);
             globalSessions = globalData.sessions || [];
             canUseGlobal = globalEligibleRole && globalSessions.length > 0;
         } catch {
@@ -36,7 +47,7 @@
     function sessionOptions(type) {
         const list = type === "global" ? globalSessions : personalSessions;
         if (!list.length) return `<option value="">-- No active sender --</option>`;
-        return list.map((s) => `<option value="${s.number}">${s.number}</option>`).join("");
+        return list.map((s) => `<option value="${s.number}" data-owner-user-id="${escapeHtml(s.ownerUserId || user.id)}">${s.number}</option>`).join("");
     }
 
     function functionOptions(targetKind = "number") {
@@ -49,6 +60,14 @@
                 <span class="message-option-copy"><strong>${f.label}</strong><small>${f.type || "automatic message"}</small></span>
             </button>
         `).join("") || `<div class="sub">No message type is available for this target.</div>`;
+    }
+
+    function normalizeTargetNumber(value) {
+        const raw = String(value || "").trim();
+        if (!raw || !/^[+\d\s().-]+$/.test(raw)) return null;
+        const number = raw.replace(/\D/g, "");
+        if (!/^[1-9]\d{7,14}$/.test(number)) return null;
+        return number;
     }
 
     function consoleJobMarkup(job) {
@@ -190,13 +209,23 @@
         let activeJobId = null;
         let pollTimer = null;
         let activityTimer = null;
+        let activitySignature = "";
 
         async function loadActivity() {
             if (activityTimer) clearTimeout(activityTimer);
             try {
                 const data = await api("/xmessage/console");
-                activityList.innerHTML = data.jobs.length ? data.jobs.map(consoleJobMarkup).join("") : `<div class="sub">No active Travas process.</div>`;
-                activityList.querySelectorAll("[data-console-stop]").forEach((button) => button.addEventListener("click", async () => { button.disabled = true; button.textContent = "Stopping..."; await api(`/xmessage/jobs/${button.dataset.consoleStop}/stop`, { method: "POST" }).catch(() => {}); loadActivity(); }));
+                const nextSignature = JSON.stringify(data.jobs.map((job) => ({
+                    id: job.id,
+                    status: job.status,
+                    sent: job.sent,
+                    logs: job.logs?.slice(-3),
+                })));
+                if (nextSignature !== activitySignature) {
+                    activitySignature = nextSignature;
+                    activityList.innerHTML = data.jobs.length ? data.jobs.map(consoleJobMarkup).join("") : `<div class="sub">No active Travas process.</div>`;
+                    activityList.querySelectorAll("[data-console-stop]").forEach((button) => button.addEventListener("click", async () => { button.disabled = true; button.textContent = "Stopping..."; await api(`/xmessage/jobs/${button.dataset.consoleStop}/stop`, { method: "POST" }).catch(() => {}); loadActivity(); }));
+                }
                 if (data.jobs.some((job) => ["queued", "running", "stopping"].includes(job.status))) activityTimer = setTimeout(loadActivity, 1000);
             } catch (error) { activityList.innerHTML = `<div class="sub">Console unavailable.</div>`; }
         }
@@ -246,7 +275,10 @@
             if (!sessionNumber.value) return toast("No active session available.", "error");
             if (!targetInput.value.trim()) return toast(targetType.value === "group" ? "A group link is required." : targetType.value === "channel" ? "A channel link is required." : "A target number is required.", "error");
 
-            const target = targetInput.value.trim();
+            const target = targetType.value === "number"
+                ? normalizeTargetNumber(targetInput.value)
+                : targetInput.value.trim();
+            if (!target) return toast("Nomor WhatsApp hanya boleh berisi angka dan format nomor yang valid.", "error");
             summary.innerHTML = `<div><span>Sender</span><strong>${sessionNumber.value}</strong></div><div><span>Target</span><strong>${target}</strong></div><div><span>Message Type</span><strong>${fn.label}</strong></div>`;
             overlay.hidden = false;
             confirmActions.hidden = false;
@@ -272,7 +304,12 @@
             const resultBox = document.getElementById("execute-result");
             const btn = document.getElementById("confirm-send");
             const fn = functions.find((f) => f.id === selectedFunctionId);
-            const target = document.getElementById("target-number").value.trim();
+            const rawTarget = document.getElementById("target-number").value.trim();
+            const target = targetType.value === "number" ? normalizeTargetNumber(rawTarget) : rawTarget;
+            if (!target) {
+                toast("Nomor WhatsApp hanya boleh berisi angka dan format nomor yang valid.", "error");
+                return;
+            }
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> Starting...`;
             confirmActions.hidden = true;
@@ -287,6 +324,9 @@
                     body: {
                         sessionType: sessionType.value,
                         sessionNumber: sessionNumber.value,
+                            sessionOwnerId: sessionType.value === "personal"
+                                ? (sessionNumber.selectedOptions[0]?.dataset.ownerUserId || user.id)
+                                : "",
                         targetNumber: target,
                         targetType: targetType.value,
                         functionId: fn.id,

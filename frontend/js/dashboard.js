@@ -162,6 +162,7 @@
             document.querySelectorAll(".nav-box-extra").forEach((item) => item.classList.toggle("is-visible", !expanded));
         });
 
+        let notificationSnapshot = "";
         async function refreshNotificationsOnly() {
             if (document.hidden) return;
             try {
@@ -169,6 +170,9 @@
                 const nextItems = Array.isArray(fresh.notifications) ? fresh.notifications : [];
                 const root = document.querySelector(".dashboard-notifications");
                 if (!root) return;
+                const nextSnapshot = JSON.stringify(nextItems);
+                if (nextSnapshot === notificationSnapshot) return;
+                notificationSnapshot = nextSnapshot;
                 const count = nextItems.filter((n) => !n.read).length;
                 const badge = root.querySelector(".notification-count");
                 if (badge) badge.textContent = String(count);
